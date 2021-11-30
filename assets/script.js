@@ -4,103 +4,7 @@ startButton = document.getElementById("start-btn");
 
 var GAME_LENGTH = 90;
 var PENALTY = 10;
-var QUESTION_LIST = [
-    {
-        question: "Commonly used data types DO NOT include the following:",
-        a1: {
-            text: "",
-            value: false
-        },
-        a2: {
-            text: "",
-            value: false
-        },
-        a3: {
-            text: "alerts",
-            value: true
-        },
-        a4: {
-            text: "",
-            value: false
-        }
-    },
-    {
-        question: "The condition of an if/else statement is enclosed within:",
-        a1: {
-            text: "parentheses",
-            value: true
-        },
-        a2: {
-            text: "",
-            value: false
-        },
-        a3: {
-            text: "",
-            value: false
-        },
-        a4: {
-            text: "",
-            value: false
-        }
-    },
-    {
-        question: "Arrays in JavaScript can be used to store:",
-        a1: {
-            text: "",
-            value: false
-        },
-        a2: {
-            text: "",
-            value: false
-        },
-        a3: {
-            text: "",
-            value: false
-        },
-        a4: {
-            text: "All of the above",
-            value: true
-        }
-    },
-    {
-        question: "Strings must be enclosed with _ before being assigned to a variable.",
-        a1: {
-            text: "",
-            value: false
-        },
-        a2: {
-            text: "quotes",
-            value: true
-        },
-        a3: {
-            text: "",
-            value: false
-        },
-        a4: {
-            text: "",
-            value: false
-        }
-    },
-    {
-        question: "A very useful tool during development and debugging for printing content to the debugger is:",
-        a1: {
-            text: "",
-            value: false
-        },
-        a2: {
-            text: "console.log",
-            value: true
-        },
-        a3: {
-            text: "",
-            value: false
-        },
-        a4: {
-            text: "",
-            value: false
-        }
-    }
-];
+
 
 var playingGame = false;
 var currentQuestion;
@@ -134,7 +38,7 @@ function startGame(){
 
 function checkAnswer(e){
     button = e.target;
-    //For some reason clicking start button would otherwise reduce score by 10, despite playingGame being false.
+    //For some reason clicking start button would otherwise reduce score by 10 on game start, despite playingGame being false.
     if(button.id === "start-btn"){
         return; 
     }
@@ -180,8 +84,35 @@ function handleScore(score){
 
         document.getElementById("save").addEventListener("click", function(){
             var initials = document.getElementById("initials").value;
+            var entry = {initials: initials, score: score};
             if(initials !== ""){
-                
+                var scores = JSON.parse(localStorage.getItem("scores"));
+                console.log(Array.isArray(scores));
+                if(Array.isArray(scores)){
+                    for(item of scores){
+                        console.log(item.score < score);
+                        if(item.score < score){
+                            console.log(scores.indexOf(item));
+                            scores.splice(scores.indexOf(item), 0, entry);
+                            console.log(scores);
+                            break;
+                        }
+                    }
+                    console.log(!scores.includes(entry))
+                    if(!scores.includes(entry)){
+                        scores.push(entry);
+                    }
+                }else{
+                    scores = [entry];
+                }
+                localStorage.setItem("scores", JSON.stringify(scores));
+                leaderboard = `<ol>`;
+                for(item of scores){
+                    leaderboard += `<li>${item.initials}, ${item.score}</li>`
+                }
+                leaderboard += `</ol><button id="continue">Play again</button>`;
+                questionBox.innerHTML = leaderboard;
+                document.getElementById("continue").addEventListener("click", promptNewGame);
             }else{
                 alert("Please enter your initials!")
             }
@@ -191,10 +122,16 @@ function handleScore(score){
     function promptNewGame(){
         questionBox.innerHTML = `
         <p>Would you like to play again?</p>
-        <button onclick="startGame()">Yes!<button>`;
+        <button id="start-btn">Yes!<button>`;
+        document.getElementById("start-btn").addEventListener("click", startGame);
     }
 }
 
+/**
+ * Adapted from a thread on array randomization on StackOverflow
+ * @param {Array} array an array of at least two objects
+ * @returns a copy of array, except with all elements in a random order
+ */
 function shuffle(array) {
     var currentIndex = array.length;
     var randomIndex;
