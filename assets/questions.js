@@ -1,3 +1,7 @@
+/**
+ * This is its own separate script because I hate scrolling.
+ */
+
 var QUESTION_LIST = [
     {
         question: "Commonly used data types DO NOT include the following:",
